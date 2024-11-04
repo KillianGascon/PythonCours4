@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 
@@ -30,7 +30,6 @@ def save_users(users: List[User]):
     with open(users_file, "w") as f:
         json.dump([user.dict() for user in users], f, indent=4)
 
-# Middleware pour obtenir l'utilisateur authentifié
 def get_current_user(username: str):
     users = load_users()
     user = next((u for u in users if u.username.lower() == username.lower()), None)
@@ -49,10 +48,10 @@ def create_user(user: User):
     return {"username": user.username, "todo_count": len(user.tasks)}
 
 @app.post("/users/me/todo", response_model=Task, status_code=201)
-def add_todo_for_user(task: Task):  # Assurez-vous de passer l'utilisateur dans la requête
+def add_todo_for_user(task: Task):
     user = get_current_user("Daron")
     user.tasks.append(task.dict())
-    save_users(load_users())  # Enregistrer les utilisateurs après ajout de la tâche
+    save_users(load_users())
     return task
 
 @app.get("/users/me/todos", response_model=List[Task])
